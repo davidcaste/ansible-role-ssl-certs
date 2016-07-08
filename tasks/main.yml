@@ -6,70 +6,113 @@
 
   - name: Ensure ssl folder exist
     file:
-      path: "{{ ssl_certs_path }}"
+      path: "{{ item.path }}"
       state: directory
       owner: "{{ ssl_certs_path_owner }}"
       group: "{{ ssl_certs_path_group }}"
       mode: "{{ ssl_certs_mode }}"
+    with_items: "{{ ssl_certs }}"
     tags: [ssl-certs,configuration]
 
-  - local_action: stat path={{ ssl_certs_local_privkey_path }}
+  - local_action: stat path={{ item.local_privkey_path }}
     register: stat_privkey
     become: no
+    with_items: "{{ ssl_certs }}"
     tags: [ssl-certs,configuration]
 
-  - local_action: stat path={{ ssl_certs_local_cert_path }}
+  - local_action: stat path={{ item.local_cert_path }}
     register: stat_cert
     become: no
+    with_items: "{{ ssl_certs }}"
     tags: [ssl-certs,configuration]
 
   - name: Test if privkey file is needed
-    fail: msg="Privkey file {{ ssl_certs_local_privkey_path }} is missing"
-    when: not stat_privkey.stat.exists and stat_cert.stat.exists
+    fail: msg="Privkey file {{ item.0.local_privkey_path }} is missing"
+    when: not item.1.stat.exists and item.2.stat.exists
+    with_together:
+      - "{{ ssl_certs }}"
+      - "{{ stat_privkey.results }}"
+      - "{{ stat_cert.results }}"
     tags: [ssl-certs,configuration]
 
   - name: Test if cert file is needed
-    fail: msg="Cert file {{ ssl_certs_local_cert_path }} is missing"
-    when: stat_privkey.stat.exists and not stat_cert.stat.exists
+    fail: msg="Cert file {{ item.0.local_cert_path }} is missing"
+    when: item.1.stat.exists and not item.2.stat.exists
+    with_together:
+      - "{{ ssl_certs }}"
+      - "{{ stat_privkey.results }}"
+      - "{{ stat_cert.results }}"
+    tags: [ssl-certs,configuration]
+
+  - name: Determine if certificate creation is necessary
+    set_fact:
+      ssl_certs_requires_creation: "{{ ssl_certs_requires_creation|default([]) + [( not item.1.stat.exists and not item.2.stat.exists) and ( item.0.local_privkey_data is undefined and item.0.local_cert_data is undefined )] }}"
+    with_together:
+      - "{{ ssl_certs }}"
+      - "{{ stat_privkey.results }}"
+      - "{{ stat_cert.results }}"
     tags: [ssl-certs,configuration]
 
   - include: generate.yml
-    when: >
-      ( not stat_privkey.stat.exists and not stat_cert.stat.exists )
-      and ( ssl_certs_local_privkey_data is undefined and ssl_certs_local_cert_data is undefined )
     tags: [ssl-certs,configuration]
 
   - name: Copy SSL certificates
     copy:
-      src: "{{ item.src }}"
-      dest: "{{ item.dest }}"
+      src: "{{ item.0.local_cert_path }}"
+      dest: "{{ item.0.cert_path }}"
       owner: "{{ ssl_certs_path_owner }}"
       group: "{{ ssl_certs_path_group }}"
       mode: "{{ ssl_certs_mode }}"
     when: >
-      ( stat_privkey.stat.exists and stat_cert.stat.exists )
-      and ( ssl_certs_local_privkey_data is undefined and ssl_certs_local_cert_data is undefined )
-    with_items:
-      - { src: "{{ ssl_certs_local_cert_path }}", dest: "{{ ssl_certs_cert_path }}" }
-      - { src: "{{ ssl_certs_local_privkey_path }}", dest: "{{ ssl_certs_privkey_path }}" }
+      ( item.1.stat.exists and item.2.stat.exists )
+      and ( item.0.local_privkey_data is undefined and item.0.local_cert_data is undefined )
+    with_together:
+      - "{{ ssl_certs }}"
+      - "{{ stat_privkey.results }}"
+      - "{{ stat_cert.results }}"
     tags: [ssl-certs,configuration]
 
-  - name: Copy SSL certificate data
+  - name: Copy SSL private keys
     copy:
-      content: "{{ item.content }}"
-      dest: "{{ item.dest }}"
+      src: "{{ item.0.local_privkey_path }}"
+      dest: "{{ item.0.privkey_path }}"
       owner: "{{ ssl_certs_path_owner }}"
       group: "{{ ssl_certs_path_group }}"
       mode: "{{ ssl_certs_mode }}"
-    when: ssl_certs_local_privkey_data is defined and ssl_certs_local_cert_data is defined
-    with_items:
-      - { content: "{{ ssl_certs_local_cert_data|default }}", dest: "{{ ssl_certs_cert_path }}" }
-      - { content: "{{ ssl_certs_local_privkey_data|default }}", dest: "{{ ssl_certs_privkey_path }}" }
+    when: >
+      ( item.1.stat.exists and item.2.stat.exists )
+      and ( item.0.local_privkey_data is undefined and item.0.local_cert_data is undefined )
+    with_together:
+      - "{{ ssl_certs }}"
+      - "{{ stat_privkey.results }}"
+      - "{{ stat_cert.results }}"
+    tags: [ssl-certs,configuration]
+
+  - name: Copy SSL certificate from data
+    copy:
+      content: "{{ item.local_cert_data|default }}"
+      dest: "{{ item.cert_path }}"
+      owner: "{{ ssl_certs_path_owner }}"
+      group: "{{ ssl_certs_path_group }}"
+      mode: "{{ ssl_certs_mode }}"
+    when: item.local_privkey_data is defined and item.local_cert_data is defined
+    with_items: "{{ ssl_certs }}"
+    no_log: true
+    tags: [ssl-certs,configuration]
+
+  - name: Copy SSL private key from data
+    copy:
+      content: "{{ item.local_privkey_data|default }}"
+      dest: "{{ {{ item.privkey_path }} }}"
+      owner: "{{ ssl_certs_path_owner }}"
+      group: "{{ ssl_certs_path_group }}"
+      mode: "{{ ssl_certs_mode }}"
+    when: item.local_privkey_data is defined and item.local_cert_data is defined
+    with_items: "{{ ssl_certs }}"
     no_log: true
     tags: [ssl-certs,configuration]
 
   - name: Generate strong DHE parameter - https://weakdh.org/
-    command: openssl dhparam -out {{ssl_certs_dhparam_path}} {{ssl_certs_dhparam_size}} creates={{ssl_certs_dhparam_path}}
+    command: openssl dhparam -out {{ ssl_certs_dhparam_path }} {{ ssl_certs_dhparam_size }} creates={{ ssl_certs_dhparam_path }}
     when: ssl_certs_generate_dh_param
     tags: [ssl-certs,configuration]
-
