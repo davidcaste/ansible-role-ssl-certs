@@ -7,3 +7,66 @@
           privkey_path: "{{ ssl_certs_path }}/travis.dev.key"
           cert_path: "{{ ssl_certs_path }}/travis.dev.pem"
           csr_path: "{{ ssl_certs_path }}/travis.dev.csr"
+    - role: ansible-role-ssl-certs
+      ssl_certs:
+        - fields: "/C=US/ST=New York/L=New York/O=Your company/CN=travis.dev"
+          privkey_path: "{{ ssl_certs_path }}/test0.key"
+          cert_path: "{{ ssl_certs_path }}/test0.pem"
+          csr_path: "{{ ssl_certs_path }}/test0.csr"
+        - privkey_path: "{{ ssl_certs_path }}/test1.key"
+          cert_path: "{{ ssl_certs_path }}/test1.crt"
+          local_privkey_path: '{{ inventory_dir|default(playbook_dir) }}/.tests/test1.key'
+          local_cert_path: '{{ inventory_dir|default(playbook_dir) }}/.tests/test1.crt'
+        - privkey_path: "{{ ssl_certs_path }}/test2.key"
+          cert_path: "{{ ssl_certs_path }}/test2.crt"
+          local_privkey_data: |
+            -----BEGIN PRIVATE KEY-----
+            MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDIGf8FSpq/hMYt
+            7ZpfoasSr5bc2NCLZ2Px4RoxlW1sxpXv2MkG4m2nvVVNhX5MnX3YxDOWd9r8VHww
+            oln9PzqjTYxLrpexaHcfhkj4f88BELM75Du7bmZOC+kKhA5MLQAqNE0U+potFxc+
+            nBsTk3CZvDQqitxxT7RWxxudt8ekyI7SDbinx0lfLoF3tFVyThK3QPYk4z9+Skey
+            Je67sxnYRGP7AmF4ul5ad+/GKbBWUIc00M5cQWZmZETg/nlRLbBzX9pD9lNxZ0TS
+            v1XyKipA1tr1EMt49dGDszQ8Wpq0F9EFOhJae+KZmfTKxhKDLXhHZbfPUkPrR72D
+            9CeTqddxAgMBAAECggEAJyuXlVSWWFlIZiM17fR6xYyjzpWOtUtG8EltVDl5EysI
+            nMvmBjf62TQh56vzHlJSGUXHB3Rs5KoxKWAOl5lyBBehGAuUXEEj2ILz89kpD39S
+            Zq3112n0EuEX/Fv/ZIAGoTxdvnaUCbGUdkgesMVS7HVADPfj0TaWCcquKECajzHu
+            wRNR9/TqsgiZBzWDM/gmCZljPJm+p0ujhsTQhWXxY6WJzbEh1UhNgz5cwVJncxnI
+            Me9BSETL6ORETEStqX79/kyzGoJkz1sj1koUHmBZR/2VBkCK+12v8PmOsvodAfyb
+            H7/35l0Y72ADAnCFmOdQ6EI4X2dSq1mVsAZhHA8AAQKBgQDqWkz2Ydo2x5wA7i9X
+            xI5/ahXeJ60OMQ/lvzO/JvXmhlnfVokiSxvAj6qDYCNua1bgccNuR1A+0vqAyoe/
+            IQcER+zji7FfFTtiAK6eHqVIIUqepCiwXqTXS1SlxvVwo1I2HjPYTPBGuwu2+Cmq
+            wOgPoD7lWYSyQuKAjXLiU/MAAQKBgQDalcNzr4dzJ4AVJPTehQiW/4QJFUcMn7w7
+            Y2Js/2NeRViUbBAN+zslVYzzFGf7DF/5QrvlRQLzYVzuZrPUi320n+5qfkpvi8O8
+            9S/6pVB9JS2Cik4mZiav5TUyW0cxSYLVit8K5KNZXt2xnIC/SsN8p/edzpaDIyHe
+            uWbtcGbXcQKBgDPCzBrjE/pjbh56fTRqcnrL6JaPttZamcNJztkadtd6tyDwEQvl
+            APUwBh5MPqclyCN8nQifcabenHuTwBXD6rPUWwsLEJsKqnoD4o2EAUeEKuINKfuC
+            e/AdcE3JOu6s8/yGATd2Dt/gcj7wYuuW/eptn1ayxe9FfJeeJlC88AABAoGAP61p
+            ZwY3m2Bie8ZsX3a57eM5/7tnG1Jdb5+gSMiNliT1jSd99dS+gj3N9fJ36DbOrrq2
+            KjBUj7pJbFoXAVAxqrD8r6Fi5eP9fcqf05DdRdfSzjikU6Nmmc9YE/drYfxcVQFD
+            wNSikaKFSvygtRl+oY39IMfSKRnPACdayMj57MECgYEA20fSo0vx8V6aVCFpcr+d
+            WvBwXMWt0rcNFZOSKusQ4uiWIkyBx8Y1YPwJ5nWrfPZbmJmu2Hzx8Ii84OE6Teah
+            sJ1BoOZ5aB7xzFJtd3TB9iNAslfeM3QoJ+SHuwlbXzYolGCgW8eRE7lRbWHepD/2
+            P3Ce4s1CCburO1h65m1Y7os=
+            -----END PRIVATE KEY-----
+          local_cert_data: |
+            -----BEGIN CERTIFICATE-----
+            MIIDXTCCAkWgAwIBAgIJALIAX5vkqcDJMA0GCSqGSIb3DQEBCwUAMEUxCzAJBgNV
+            BAYTAkFVMRMwEQYDVQQIDApTb21lLVN0YXRlMSEwHwYDVQQKDBhJbnRlcm5ldCBX
+            aWRnaXRzIFB0eSBMdGQwHhcNMTYwNzA5MDk1NzI2WhcNMTcwNzA5MDk1NzI2WjBF
+            MQswCQYDVQQGEwJBVTETMBEGA1UECAwKU29tZS1TdGF0ZTEhMB8GA1UECgwYSW50
+            ZXJuZXQgV2lkZ2l0cyBQdHkgTHRkMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIB
+            CgKCAQEAyBn/BUqav4TGLe2aX6GrEq+W3NjQi2dj8eEaMZVtbMaV79jJBuJtp71V
+            TYV+TJ192MQzlnfa/FR8MKJZ/T86o02MS66XsWh3H4ZI+H/PARCzO+Q7u25mTgvp
+            CoQOTC0AKjRNFPqaLRcXPpwbE5Nwmbw0KorccU+0VscbnbfHpMiO0g24p8dJXy6B
+            d7RVck4St0D2JOM/fkpHsiXuu7MZ2ERj+wJheLpeWnfvximwVlCHNNDOXEFmZmRE
+            4P55US2wc1/aQ/ZTcWdE0r9V8ioqQNba9RDLePXRg7M0PFqatBfRBToSWnvimZn0
+            ysYSgy14R2W3z1JD60e9g/Qnk6nXcQIDAQABo1AwTjAdBgNVHQ4EFgQUJv4fxrIT
+            9iyyCj+xyNf3gNi4MIEwHwYDVR0jBBgwFoAUJv4fxrIT9iyyCj+xyNf3gNi4MIEw
+            DAYDVR0TBAUwAwEB/zANBgkqhkiG9w0BAQsFAAOCAQEAKiOmb4ZDthzr+nBuTfiv
+            bF43t8zi0u9sXlUkYCUjoiQWpDPoys5EBCMe43qfUE+7N6a9I+xkMhZHnKEsF3gB
+            tc4lHk6IHH0jSD8MKCqINI1Z4ddAKeyS7OCX+5g1wCkn5Az42A0vQvOf120K+yCq
+            tNtZJe20tJEl+O3+PBdmZ3IUyZlGELfmc881QKQLzq26xaERsI2idRTKtALMtw6Y
+            GxA0ZKv4gbPBQBSen9xaGwB1gjl9/m03nd70fbkvxqrW2cMunFSZeIiDE8+nm9gb
+            gpUp7VL40NIAx202D64Qiq/oNiW1BgNl6m6RHUP70tjIfCshAm/LMa49FgbkryJY
+            aA==
+            -----END CERTIFICATE-----
