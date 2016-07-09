@@ -1,4 +1,9 @@
 - hosts: travis.dev
   remote_user: root
   roles:
-    - ansible-role-ssl-certs
+    - role: ansible-role-ssl-certs
+      ssl_certs:
+        - fields: "/C=US/ST=New York/L=New York/O=Your company/CN=travis.dev"
+          privkey_path: "{{ ssl_certs_path }}/travis.dev.key"
+          cert_path: "{{ ssl_certs_path }}/travis.dev.pem"
+          csr_path: "{{ ssl_certs_path }}/travis.dev.csr"
