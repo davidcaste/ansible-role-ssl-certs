@@ -6,21 +6,20 @@
 
   - name: Ensure ssl folder exist
     file:
-      path: "{{ item.path }}"
+      path: "{{ ssl_certs_path }}"
       state: directory
       owner: "{{ ssl_certs_path_owner }}"
       group: "{{ ssl_certs_path_group }}"
       mode: "{{ ssl_certs_mode }}"
-    with_items: "{{ ssl_certs }}"
     tags: [ssl-certs,configuration]
 
-  - local_action: stat path={{ item.local_privkey_path }}
+  - local_action: stat path={{ item.local_privkey_path|default('') }}
     register: stat_privkey
     become: no
     with_items: "{{ ssl_certs }}"
     tags: [ssl-certs,configuration]
 
-  - local_action: stat path={{ item.local_cert_path }}
+  - local_action: stat path={{ item.local_cert_path|default('') }}
     register: stat_cert
     become: no
     with_items: "{{ ssl_certs }}"
@@ -44,9 +43,12 @@
       - "{{ stat_cert.results }}"
     tags: [ssl-certs,configuration]
 
+  - set_fact:
+      ssl_certs_requires_creation: []
+
   - name: Determine if certificate creation is necessary
     set_fact:
-      ssl_certs_requires_creation: "{{ ssl_certs_requires_creation|default([]) + [( not item.1.stat.exists and not item.2.stat.exists) and ( item.0.local_privkey_data is undefined and item.0.local_cert_data is undefined )] }}"
+      ssl_certs_requires_creation: "{{ ssl_certs_requires_creation + [( not item.1.stat.exists and not item.2.stat.exists) and ( item.0.local_privkey_data is undefined and item.0.local_cert_data is undefined )] }}"
     with_together:
       - "{{ ssl_certs }}"
       - "{{ stat_privkey.results }}"
@@ -103,7 +105,7 @@
   - name: Copy SSL private key from data
     copy:
       content: "{{ item.local_privkey_data|default }}"
-      dest: "{{ {{ item.privkey_path }} }}"
+      dest: "{{ item.privkey_path }}"
       owner: "{{ ssl_certs_path_owner }}"
       group: "{{ ssl_certs_path_group }}"
       mode: "{{ ssl_certs_mode }}"
