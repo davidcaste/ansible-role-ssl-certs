@@ -17,12 +17,14 @@
     register: stat_privkey
     become: no
     with_items: "{{ ssl_certs }}"
+    no_log: true
     tags: [ssl-certs,configuration]
 
   - local_action: stat path={{ item.local_cert_path|default('') }}
     register: stat_cert
     become: no
     with_items: "{{ ssl_certs }}"
+    no_log: true
     tags: [ssl-certs,configuration]
 
   - name: Test if privkey file is needed
@@ -32,6 +34,7 @@
       - "{{ ssl_certs }}"
       - "{{ stat_privkey.results }}"
       - "{{ stat_cert.results }}"
+    no_log: true
     tags: [ssl-certs,configuration]
 
   - name: Test if cert file is needed
@@ -41,6 +44,7 @@
       - "{{ ssl_certs }}"
       - "{{ stat_privkey.results }}"
       - "{{ stat_cert.results }}"
+    no_log: true
     tags: [ssl-certs,configuration]
 
   - set_fact:
@@ -53,6 +57,7 @@
       - "{{ ssl_certs }}"
       - "{{ stat_privkey.results }}"
       - "{{ stat_cert.results }}"
+    no_log: true
     tags: [ssl-certs,configuration]
 
   - include: generate.yml
@@ -72,6 +77,7 @@
       - "{{ ssl_certs }}"
       - "{{ stat_privkey.results }}"
       - "{{ stat_cert.results }}"
+    no_log: true
     tags: [ssl-certs,configuration]
 
   - name: Copy SSL private keys
@@ -88,6 +94,7 @@
       - "{{ ssl_certs }}"
       - "{{ stat_privkey.results }}"
       - "{{ stat_cert.results }}"
+    no_log: true
     tags: [ssl-certs,configuration]
 
   - name: Copy SSL certificate from data

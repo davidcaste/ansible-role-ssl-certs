@@ -5,6 +5,7 @@
     with_together:
       - "{{ ssl_certs }}"
       - "{{ ssl_certs_requires_creation }}"
+    no_log: true
 
   - name: RSA key file ownership
     file: path={{ item.0.privkey_path }} owner={{ ssl_certs_path_owner }} group={{ ssl_certs_path_group }} mode={{ ssl_certs_mode }}
@@ -12,6 +13,7 @@
     with_together:
       - "{{ ssl_certs }}"
       - "{{ ssl_certs_requires_creation }}"
+    no_log: true
 
   - name: Generate CSR
     command: openssl req -new -sha256 -subj "{{ item.0.fields }}" -key {{ item.0.privkey_path }} -out {{ item.0.csr_path }} creates={{ item.0.csr_path }}
@@ -19,6 +21,7 @@
     with_together:
       - "{{ ssl_certs }}"
       - "{{ ssl_certs_requires_creation }}"
+    no_log: true
 
   - name: CSR file ownership
     file: path={{ item.0.csr_path }} owner={{ ssl_certs_path_owner }} group={{ ssl_certs_path_group }} mode={{ ssl_certs_mode }}
@@ -26,6 +29,7 @@
     with_together:
       - "{{ ssl_certs }}"
       - "{{ ssl_certs_requires_creation }}"
+    no_log: true
 
   - name: Generate self-signed SSL certificate
     command: openssl req -nodes -x509 -days {{ item.0.expiration_days|default("365") }} -in {{ item.0.csr_path }} -key {{ item.0.privkey_path }} -out {{ item.0.cert_path }} -extensions v3_ca creates={{ item.0.cert_path }}
@@ -33,6 +37,7 @@
     with_together:
       - "{{ ssl_certs }}"
       - "{{ ssl_certs_requires_creation }}"
+    no_log: true
 
   - name: Self-signed SSL certificate file ownership
     file: path={{ item.0.cert_path }} owner={{ ssl_certs_path_owner }} group={{ ssl_certs_path_group }} mode={{ ssl_certs_mode }}
@@ -40,3 +45,4 @@
     with_together:
       - "{{ ssl_certs }}"
       - "{{ ssl_certs_requires_creation }}"
+    no_log: true
